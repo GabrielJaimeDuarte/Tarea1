@@ -1,6 +1,5 @@
 # =========================================
 # Inteligencia Artificial - Tarea práctica
-# Punto 1: Modificar la función mover_robot para que la batería baje en cada movimiento
 # =========================================
 
 import random
@@ -51,9 +50,13 @@ def recompensa(accion, nuevo_estado):
 def mover_robot(estado, accion):
     x, y = estado["posicion"]
 
+    if estado["bateria"] <= 0 and accion != "recargar":
+        print("El robot no puede moverse, batería agotada.")
+        return estado
+
     if accion == "adelante":
         x = min(x + 1, 2)
-        estado["bateria"] -= 10  # 🔋 cada movimiento gasta batería
+        estado["bateria"] -= 10
     elif accion == "atras":
         x = max(x - 1, 0)
         estado["bateria"] -= 10
@@ -81,7 +84,7 @@ def mover_robot(estado, accion):
 # ========================
 # 6. SIMULACIÓN DEL ROBOT
 # ========================
-estado = {"posicion": (0, 0), "bateria": 50, "objetivo_alcanzado": False}
+estado = {"posicion": (0, 0), "bateria": 100, "objetivo_alcanzado": False}
 recompensa_total = 0
 
 for paso in range(10):
