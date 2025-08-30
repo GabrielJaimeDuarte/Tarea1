@@ -32,17 +32,28 @@ acciones = ["adelante", "atras", "izquierda", "derecha", "recargar"]
 print("\nAcciones posibles:", acciones)
 
 # ========================
-# 4. FUNCIÓN DE RECOMPENSA (básica, sin otros puntos aún)
+# 4. FUNCIÓN DE RECOMPENSA
 # ========================
-def recompensa(accion, nuevo_estado):
+def recompensa(accion, estado, pasos):
+    # Recargar siempre da puntos
     if accion == "recargar":
         return 5
-    elif nuevo_estado["objetivo_alcanzado"]:
+    
+    # Intentar moverse sin batería
+    if estado["bateria"] <= 0 and accion in ["adelante", "atras", "izquierda", "derecha"]:
+        return -5
+    
+    # Llegar al objetivo
+    if estado["objetivo_alcanzado"]:
+        if pasos < 5:
+            return 20  # bonus por llegar rápido
         return 10
-    elif accion in ["adelante", "atras", "izquierda", "derecha"]:
-        return -1  # costo de moverse
-    else:
-        return 0
+
+    # Moverse gasta energía
+    if accion in ["adelante", "atras", "izquierda", "derecha"]:
+        return -1
+
+    return 0
 
 # ========================
 # 5. AMBIENTE Y SIMULACIÓN
@@ -50,8 +61,9 @@ def recompensa(accion, nuevo_estado):
 def mover_robot(estado, accion):
     x, y = estado["posicion"]
 
+    # ⚠️ Si batería = 0, solo puede recargar
     if estado["bateria"] <= 0 and accion != "recargar":
-        print("El robot no puede moverse, batería agotada.")
+        print("⚠️ El robot no puede moverse, batería agotada.")
         return estado
 
     if accion == "adelante":
@@ -90,7 +102,7 @@ recompensa_total = 0
 for paso in range(10):
     accion = random.choice(acciones)
     estado = mover_robot(estado, accion)
-    r = recompensa(accion, estado)
+    r = recompensa(accion, estado, paso + 1)
     recompensa_total += r
 
     print(f"Paso {paso+1}: Acción = {accion}, Estado = {estado}, Recompensa = {r}")
